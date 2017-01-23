@@ -1,0 +1,6 @@
+Total Running Time: 1.80079293251 seconds
+Program starts at:  2015-03-07 22:12:07
+Total Running Time: 1.89482092857 seconds
+Program starts at:  2015-03-09 09:18:53
+Total Running Time: 1.86035704613 seconds
+Program ends at:  2015-03-09 09:18:54
