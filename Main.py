@@ -16,7 +16,7 @@ from RandomSplitMulticlassClassification import RandomSplitMulticlassClassificat
 from Modules import RenameApksAccordingToTime
 from OnlineAnalysis import OnlineAnalysis
 
-def main(IgnoredParameter, VocabularyDirectory="/media/moscato/b30d256d-8c87-4922-999d-7f45738f52fa/School/Duy/VocabularyDirectory", MalwareDirectory="/media/moscato/b30d256d-8c87-4922-999d-7f45738f52fa/School/Duy/Families/10.Geinimi", GoodwareDirectory="/media/moscato/b30d256d-8c87-4922-999d-7f45738f52fa/School/Duy/GooglePlay", TestBad = "/media/moscato/b30d256d-8c87-4922-999d-7f45738f52fa/School/Duy/drebin/OtherMalwares", TestGood = "/media/moscato/b30d256d-8c87-4922-999d-7f45738f52fa/School/Duy/drebin/Good", ProcessNumber = 3, Option = ""):
+def main(IgnoredParameter, VocabularyDirectory, MalwareDirectory, GoodwareDirectory, TestBad = "", TestGood = "", ProcessNumber = 3, Option = ""):
     '''
     Main function for malware detection classification
 
@@ -41,8 +41,8 @@ def main(IgnoredParameter, VocabularyDirectory="/media/moscato/b30d256d-8c87-492
  the parent folder of specific malware family folders, and minimum number of samples per family is 30)"
         print "4: RandomSplit test for each malware family(Note that MalwareDirectory here should be\
  the parent folder of specific malware family folders). Make sure you have sufficient mal samples in every family - suggested size: 30 samples per family. I do not check for it. Train Test Ratio (hard coded) to 70:30."
-#        print "5: Multiclass classification for malware families(Note that MalwareDirectory here should be\
-# the parent folder of specific malware family folders)"
+        print "5: Multiclass classification for malware families(Note that MalwareDirectory here should be\
+ the parent folder of specific malware family folders)"
         print "6: Rename apks and rearrange the test sets structure according to the class.dex file\
  generation date.(Warning: Original dataset structure will be modified)"
         print "7: Do an online classification analysis.(Dataset should be prepared using Option 6)"
