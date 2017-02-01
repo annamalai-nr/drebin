@@ -41,8 +41,8 @@ def main(IgnoredParameter, VocabularyDirectory, MalwareDirectory, GoodwareDirect
  the parent folder of specific malware family folders, and minimum number of samples per family is 30)"
         print "4: RandomSplit test for each malware family(Note that MalwareDirectory here should be\
  the parent folder of specific malware family folders). Make sure you have sufficient mal samples in every family - suggested size: 30 samples per family. I do not check for it. Train Test Ratio (hard coded) to 70:30."
-        print "5: Multiclass classification for malware families(Note that MalwareDirectory here should be\
- the parent folder of specific malware family folders)"
+        #print "5: Multiclass classification for malware families(Note that MalwareDirectory here should be\
+ #the parent folder of specific malware family folders)"
         print "6: Rename apks and rearrange the test sets structure according to the class.dex file\
  generation date.(Warning: Original dataset structure will be modified)"
         print "7: Do an online classification analysis.(Dataset should be prepared using Option 6)"
