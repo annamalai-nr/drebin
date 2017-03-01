@@ -1,22 +1,13 @@
 import sys
-import os
-import traceback
 import inspect
 from multiprocessing import freeze_support
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
-import CommonModules as CM
 from GetApkData import GetApkData
 from BuildVocabulary import BuildVocabulary
 from RandomClassification import RandomClassification
 from HoldoutClassification import HoldoutClassification
-from GetMalwareFamilyFeatureNames import GetMalwareFamilyFeatureNames
-from BuildVocabularyForMulticlassClassifier import BuildVocabularyForMulticlassClassifier
-from RandomSplitMulticlassClassification import RandomSplitMulticlassClassification
-from Modules import RenameApksAccordingToTime
-from OnlineAnalysis import OnlineAnalysis
 
-def main(IgnoredParameter, VocabularyDirectory, MalwareDirectory, GoodwareDirectory, TestBad = "", TestGood = "", ProcessNumber = 3, Option = ""):
+def main(IgnoredParameter, MalwareDirectory, GoodwareDirectory, TestBad = "", TestGood = "", ProcessNumber = 3, Option = "", VocabularyDirectory = "VocabularyDirectory"):
     '''
     Main function for malware detection classification
 
@@ -29,25 +20,13 @@ def main(IgnoredParameter, VocabularyDirectory, MalwareDirectory, GoodwareDirect
     :param int/String ProcessNumber: number of processes scheduled for data file creation.
     :param String Option: set this parameter for automatically execution.
     '''
+
     if(type(ProcessNumber)==str):
         ProcessNumber = int(ProcessNumber)
-    if Option == "0" and Option == 0:
-        Option = "0" #Automatically do the hold out experiment. MalwareDirectory, GoodwareDirectory, TestBad and TestGood have to be lists.
     else:
         print "Choose your option:"
         print "1: Random Split classification"
         print "2: Hold-out test set"
-        print "3: Get all features of a malware family(Note that MalwareDirectory here should be\
- the parent folder of specific malware family folders, and minimum number of samples per family is 30)"
-        print "4: RandomSplit test for each malware family(Note that MalwareDirectory here should be\
- the parent folder of specific malware family folders). Make sure you have sufficient mal samples in every family - suggested size: 30 samples per family. I do not check for it. Train Test Ratio (hard coded) to 70:30."
-        print "5: Multiclass classification for malware families(Note that MalwareDirectory here should be\
- the parent folder of specific malware family folders)"
-        print "6: Rename apks and rearrange the test sets structure according to the class.dex file\
- generation date.(Warning: Original dataset structure will be modified)"
-        print "7: Do an online classification analysis.(Dataset should be prepared using Option 6)"
-        print "8: Do a limited online classification analysis.(For Anna's experiment, will load the apk\
- names from all text files under DrebinSelectedNames folder. Dataset should be prepared using Option 6)"
         print "Enter you option:",
         Option=raw_input()
 
@@ -65,223 +44,6 @@ def main(IgnoredParameter, VocabularyDirectory, MalwareDirectory, GoodwareDirect
         if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
             GetApkData(ProcessNumber, MalwareDirectory, GoodwareDirectory, TestBad, TestGood)
         TotalFeatureDict = BuildVocabulary(VocabularyDirectory, MalwareDirectory, GoodwareDirectory, TestBad, TestGood)
-        HoldoutClassification(MalwareDirectory, GoodwareDirectory, TestBad , TestGood, TotalFeatureDict, "binary")
-    if Option=="3":
-        OptionForGetApkData = raw_input("Do you want to regenerate missing Apk Data Files? [Y/N]")
-        #OutputFiles = raw_input("Please set the output file name(path) if you want, or just press ENTER:")
-        C = input("What C(penalty parameter, default is 1) do you want to use?\n")
-        if isinstance(C, (int, float)) != True:
-            print "Incorrect C."
-            return
-        FeatureToSelect = input("How many features do you want to select?(-1 means all features)\n")
-        if isinstance(FeatureToSelect, (int, float)) != True:
-            print "Incorrect FeatureToSelect number."
-            return
-        MalwareFamilyFolders = [ os.path.join(MalwareDirectory, f) for f in os.listdir(MalwareDirectory) if os.path.isdir(os.path.join(MalwareDirectory, f)) ]
-        OutputFiles = "FeatureNamesAndImportance.txt"
-        if os.path.isfile(OutputFiles):
-            os.remove(OutputFiles)
-        if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-            GetApkData(ProcessNumber, GoodwareDirectory)
-        for Folder in MalwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-                TotalFeatureDict = BuildVocabulary(VocabularyDirectory, Folder, GoodwareDirectory, TestBad, TestGood)
-                GetMalwareFamilyFeatureNames(Folder, GoodwareDirectory, FeatureToSelect, C, TotalFeatureDict, OutputFiles)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-    if Option=="4":
-        OptionForGetApkData = raw_input("Do you want to regenerate missing Apk Data Files? [Y/N]")
-        #OutputFiles = raw_input("Please set the output file name(path) if you want, or just press ENTER:")
-        #C = input("What C do you want to use?\n")
-        #if isinstance(C, (int, float)) != True:
-        #    print "Incorrect C."
-        #    return
-        MalwareFamilyFolders = [ os.path.join(MalwareDirectory, f) for f in os.listdir(MalwareDirectory) if os.path.isdir(os.path.join(MalwareDirectory, f)) ]
-        OutputFiles = "FeatureFamiliesAndResults.txt"
-        f = open(OutputFiles, "w");
-        if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-            GetApkData(ProcessNumber, GoodwareDirectory)
-        for Folder in MalwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-                TotalFeatureDict = BuildVocabulary(VocabularyDirectory, Folder, GoodwareDirectory, TestBad, TestGood)
-                Report = RandomClassification(Folder, GoodwareDirectory, TotalFeatureDict, "binary")
-                f.write("Malware Family: " + Folder + "\n")
-                f.write(Report)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-        f.close()
-        print 'Pls check FeatureFamiliesAndResults.txt in CWD for result'
-    if Option=="5":
-        OptionForGetApkData = raw_input("Do you want to regenerate missing Apk Data Files? [Y/N]")
-        #OutputFiles = raw_input("Please set the output file name(path) if you want, or just press ENTER:")
-        #C = input("What C do you want to use?\n")
-        #if isinstance(C, (int, float)) != True:
-        #    print "Incorrect C."
-        #    return
-        MalwareFamilyFolders = [ os.path.join(MalwareDirectory, f) for f in os.listdir(MalwareDirectory) if os.path.isdir(os.path.join(MalwareDirectory, f)) ]
-        OutputFiles = "FeatureFamiliesAndResults.txt"
-        f = open(OutputFiles, "w");
-        if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-            GetApkData(ProcessNumber, GoodwareDirectory)
-        for Folder in MalwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-        TotalFeatureDict = BuildVocabularyForMulticlassClassifier(VocabularyDirectory, MalwareFamilyFolders, GoodwareDirectory, TestBad, TestGood)
-        RandomSplitMulticlassClassification(MalwareFamilyFolders, GoodwareDirectory, TotalFeatureDict, "binary", ProcessNumber)
-        f.write("Malware Family: " + Folder + "\n")
-        f.write(Report)
-        f.close()
-    if Option == "6":
-         RenameApksAccordingToTime.RenameApk(MalwareDirectory)
-         RenameApksAccordingToTime.RenameApk(GoodwareDirectory)
-    if Option == "7":
-        TrainningWindowSize = input("Please enter your trainning window size(>1 means multi-once or multi-daily):")
-        TestingWindowSize = input("Please enter your testing window size:")
-        OutputFileName = raw_input("Please input your OutputFileName:")
-        print "Choose your option:"
-        print "1: Once"
-        print "2: 'Daily'"
-        OnlineOption = input()
-        OptionForGetApkData = raw_input("Do you want to regenerate missing Apk Data Files? [Y/N]")
-        MalwareFamilyFolders = [ os.path.join(MalwareDirectory, f) for f in os.listdir(MalwareDirectory) if os.path.isdir(os.path.join(MalwareDirectory, f)) ]
-        for Folder in MalwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-        GoodwareFamilyFolders = [ os.path.join(GoodwareDirectory, f) for f in os.listdir(GoodwareDirectory) if os.path.isdir(os.path.join(GoodwareDirectory, f)) ]
-        for Folder in GoodwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-
-        OnlineAnalysisInstance = OnlineAnalysis(VocabularyDirectory, MalwareDirectory, GoodwareDirectory, TrainningWindowSize, TestingWindowSize, OutputFileName)
-        #OnlineAnalysisInstance.GetProcessingDirList()
-        if OnlineOption == 1: #once
-            for TrainStart, TrainEnd, TestStart, TestEnd, TrainBad, TrainGood, TestBad, TestGood in OnlineAnalysisInstance.GeneratorForOnce():
-                TrainLabels, TestLabels, PredictedLabels, TrainningTime, TestingTime = \
-                    OnlineAnalysisInstance.ClassificationForDrebin(TrainBad, TrainGood, TestBad, TestGood)
-                OnlineAnalysisInstance.PrintReport(TrainStart, TrainEnd, TestStart, TestEnd, TrainLabels, TestLabels, PredictedLabels)
-        if OnlineOption == 2: #daily
-            for TrainStart, TrainEnd, TestStart, TestEnd, TrainBad, TrainGood, TestBad, TestGood in OnlineAnalysisInstance.GeneratorForDaily():
-                TrainLabels, TestLabels, PredictedLabels, TrainningTime, TestingTime = \
-                    OnlineAnalysisInstance.ClassificationForDrebin(TrainBad, TrainGood, TestBad, TestGood)
-                OnlineAnalysisInstance.PrintReport(TrainStart, TrainEnd, TestStart, TestEnd, TrainLabels, TestLabels, PredictedLabels)
-
-    if Option == "8":
-        TrainningWindowSize = input("Please enter your trainning window size(>1 means multi-once or multi-daily):")
-        TestingWindowSize = input("Please enter your testing window size:")
-        OutputFileName = raw_input("Please input your OutputFileName:")
-        print "Choose your option:"
-        print "1: Once"
-        print "2: 'Daily'"
-        #print "3: Multi-Once"
-        #print "4: Multi-Daily"
-        OnlineOption = input()
-        OptionForGetApkData = raw_input("Do you want to regenerate missing Apk Data Files? [Y/N]")
-        MalwareFamilyFolders = [ os.path.join(MalwareDirectory, f) for f in os.listdir(MalwareDirectory) if os.path.isdir(os.path.join(MalwareDirectory, f)) ]
-        for Folder in MalwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-        GoodwareFamilyFolders = [ os.path.join(GoodwareDirectory, f) for f in os.listdir(GoodwareDirectory) if os.path.isdir(os.path.join(GoodwareDirectory, f)) ]
-        for Folder in GoodwareFamilyFolders:
-            try:
-                if OptionForGetApkData=="Y" or OptionForGetApkData == "y":
-                    GetApkData(ProcessNumber, Folder)
-            except Exception, e:
-                print traceback.format_exc()
-                print Folder, "processed failed."
-                continue
-        #Load DrebinSelectedNames lists
-        DrebinSelectedNames = []
-        for TextFile in CM.ListFiles(os.path.join(currentdir, "DrebinSelectedNames"), ".txt"):
-            with open(TextFile, "r") as Fd:
-                for Line in Fd:
-                    ApkNameWithoutExtension = (os.path.basename(Line)).split(os.extsep)[0]
-                    DrebinSelectedNames.append(ApkNameWithoutExtension)
-
-        #Rename the datafiles which are not in the DrebinSelectedNames lists
-        for DataFile in CM.ListAllFiles(MalwareDirectory, ".data"):
-            ApkNameWithoutExtension = (os.path.basename(DataFile)).split(os.extsep)[0]
-            if ApkNameWithoutExtension not in DrebinSelectedNames:
-                os.rename(DataFile, os.path.splitext(DataFile)[0] + ".datatemp")
-        for DataFile in CM.ListAllFiles(GoodwareDirectory, ".data"):
-            ApkNameWithoutExtension = (os.path.basename(DataFile)).split(os.extsep)[0]
-            if ApkNameWithoutExtension not in DrebinSelectedNames:
-                os.rename(DataFile, os.path.splitext(DataFile)[0] + ".datatemp")
-
-        OnlineAnalysisInstance = OnlineAnalysis(VocabularyDirectory, MalwareDirectory, GoodwareDirectory, TrainningWindowSize, TestingWindowSize, OutputFileName)
-        if OnlineOption == 1:
-            for TrainStart, TrainEnd, TestStart, TestEnd, TrainBad, TrainGood, TestBad, TestGood in OnlineAnalysisInstance.GeneratorForOnce():
-                TrainLabels, TestLabels, PredictedLabels, TrainningTime, TestingTime = \
-                    OnlineAnalysisInstance.ClassificationForDrebin(TrainBad, TrainGood, TestBad, TestGood)
-                if TrainningTime == 0:
-                    pass
-                else:
-                    OnlineAnalysisInstance.PrintReport(TrainStart, TrainEnd, TestStart, TestEnd, TrainLabels, TestLabels, PredictedLabels)
-        if OnlineOption == 2:
-            for TrainStart, TrainEnd, TestStart, TestEnd, TrainBad, TrainGood, TestBad, TestGood in OnlineAnalysisInstance.GeneratorForDaily():
-                TrainLabels, TestLabels, PredictedLabels, TrainningTime, TestingTime = \
-                    OnlineAnalysisInstance.ClassificationForDrebin(TrainBad, TrainGood, TestBad, TestGood)
-                if TrainningTime == 0:
-                    pass
-                else:
-                    OnlineAnalysisInstance.PrintReport(TrainStart, TrainEnd, TestStart, TestEnd, TrainLabels, TestLabels, PredictedLabels)
-
-        #Rename the datafiles back to orginal
-        for DataFile in CM.ListAllFiles(MalwareDirectory, ".datatemp"):
-            os.rename(DataFile, os.path.splitext(DataFile)[0] + ".data")
-        for DataFile in CM.ListAllFiles(GoodwareDirectory, ".datatemp"):
-            os.rename(DataFile, os.path.splitext(DataFile)[0] + ".data")
-
-    if Option == "0":
-        if(TestBad=="")or(TestGood==""):
-            print "There are some parameters not given, exit."
-            return
-        AllApkFolders = []
-        if type(MalwareDirectory) == list:
-            AllApkFolders.extend(MalwareDirectory)
-        else:
-            AllApkFolders.append(MalwareDirectory)
-        if type(GoodwareDirectory) == list:
-            AllApkFolders.extend(GoodwareDirectory)
-        else:
-            AllApkFolders.append(GoodwareDirectory)
-        if type(TestBad) == list:
-            AllApkFolders.extend(TestBad)
-        else:
-            AllApkFolders.append(TestBad)
-        if type(TestGood) == list:
-            AllApkFolders.extend(TestGood)
-        else:
-            AllApkFolders.append(TestGood)
-        GetApkData(ProcessNumber, *AllApkFolders)
-        TotalFeatureDict = BuildVocabulary(VocabularyDirectory, *AllApkFolders)
         HoldoutClassification(MalwareDirectory, GoodwareDirectory, TestBad , TestGood, TotalFeatureDict, "binary")
 
 
