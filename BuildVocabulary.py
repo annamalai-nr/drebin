@@ -1,8 +1,7 @@
-import os
 import CommonModules as CM
 from collections import OrderedDict
 
-def BuildVocabulary(VocabularyDirectory, *ApkDirectoryPaths):
+def BuildVocabulary(*ApkDirectoryPaths):
     '''
     Produce Vocabulary for data files.
 
@@ -53,18 +52,6 @@ def BuildVocabulary(VocabularyDirectory, *ApkDirectoryPaths):
             ActivityDict[Activity] = 1
         for UsedPermissions in JsonData["UsedPermissionsList"]:
             UsedPermissionsDict[UsedPermissions] = 1
-
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"ServiceDict.dict"),ServiceDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"RestrictedApiDict.dict"),RestrictedApiDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"HardwareComponentsDict.dict"),HardwareComponentsDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"BroadcastReceiverDict.dict"),BroadcastReceiverDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"SuspiciousApiDict.dict"),SuspiciousApiDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"ContentProviderDict.dict"),ContentProviderDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"URLDomainDict.dict"),URLDomainDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"IntentFilterDict.dict"),IntentFilterDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"RequestedPermissionDict.dict"),RequestedPermissionDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"ActivityDict.dict"),ActivityDict)
-    CM.ExportToJson(os.path.join(VocabularyDirectory,"UsedPermissionsDict.dict"),UsedPermissionsDict)
 
     TotalFeatureDict.update(ServiceDict)
     TotalFeatureDict.update(RestrictedApiDict)
