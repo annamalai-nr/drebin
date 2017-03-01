@@ -14063,3 +14063,14 @@
 2017/03/01 14:43:42 CommonModules.py[line:435] INFO: Json data of E:\Directory\TestGood25\pl.neurosoft.tts.trial-2.03.data loaded successfully.
 2017/03/01 14:43:42 CommonModules.py[line:435] INFO: Json data of E:\Directory\TestGood25\pl.zlaptaxi.android.ui-1.5.data loaded successfully.
 2017/03/01 14:43:42 CommonModules.py[line:435] INFO: Json data of E:\Directory\TestGood25\playfm.globus.droid-2.1.data loaded successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\ServiceDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\RestrictedApiDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\HardwareComponentsDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\BroadcastReceiverDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\SuspiciousApiDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\ContentProviderDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\URLDomainDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\IntentFilterDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\RequestedPermissionDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\ActivityDict.dict written successfully.
+2017/03/01 15:29:27 CommonModules.py[line:307] INFO: Json data of VocabularyDirectory\UsedPermissionsDict.dict written successfully.
