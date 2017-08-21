@@ -14,7 +14,6 @@ Download from [http://continuum.io/downloads](http://continuum.io/downloads).
 
 ## **Who do I talk to?** ##
 ***
-* You may send email to [e120060@e.ntu.edu.sg](mailto:e120060@e.ntu.edu.sg) to seek help~
 * You may also contact Annamalai at ANNAMALA002@e.ntu.edu.sg
 
 ## **How do I use it?** ##
