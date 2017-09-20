@@ -15,6 +15,8 @@ Download from [http://continuum.io/downloads](http://continuum.io/downloads).
 ## **Who do I talk to?** ##
 ***
 * You may also contact Annamalai at ANNAMALA002@e.ntu.edu.sg
+  Arief Kresnadi Ignatius Kasim at arie0010@e.ntu.edu.sg
+  Loo Jia Yi at e140112@e.ntu.edu.sg
 
 ## **How do I use it?** ##
 ***
@@ -22,7 +24,7 @@ Download from [http://continuum.io/downloads](http://continuum.io/downloads).
 
     For Drebin, please make the repository folder as the current working directory. The arguments of Drebin are: 
 
-    MalwareDirectory, GoodwareDirectory, TestBad, TestGood, ProcessNumber, Option**
+    MalwareDirectory, GoodwareDirectory, TestMal, TestGood, NCpuCores, TestSize, Option**
 
     You have to specify at least **MalwareDirectory, GoodwareDirectory** before conducting any experiments.
 
@@ -30,9 +32,10 @@ Download from [http://continuum.io/downloads](http://continuum.io/downloads).
 
     * MalwareDirectory: The location of the malware training set folder. It can be an absolute path of folder that contains all malware Apks or a folder that contains folders of malware Apks(used for malware family analysis and malware online analysis). More details will be shown in the functionality section.
     * GoodwareDirectory: The location of the benign-ware training set folder. It is an absolute path of folder that contains all benign-ware Apks.
-    * TestBad: The location of the malware training set folder. It is an absolute path of folder that contains all malware Apks.
-    * TestGood: The location of the benign-ware training set folder. It is an absolute path of folder that contains all benign-ware Apks.
-    * ProcessNumber: The number of processes that you want to parallelly run. It depends on how many cores your CPU have. E.g. If you have Intel 4 cores Core i7 CPU, then you’d better set this parameter to be 3. (One core for you to do some other tasks.)
+    * TestMal: The location of the malware training set folder for holdout classification(this folder will be the holdout test set). It is an absolute path of folder that contains all malware Apks.
+    * TestGood: The location of the benign-ware training set folder for holdout classification(this folder will be the holdout test set). It is an absolute path of folder that contains all benign-ware Apks.
+    * NCpuCores : The number of processes that you want to parallelly run. It depends on how many cores your CPU have. E.g. If you have Intel 4 cores Core i7 CPU, then you’d better set this parameter to be 3. (One core for you to do some other tasks.)
+    * TestSize : The testing data set size for random classification after being split by train test split function
     * Option: Set this parameter to do automatically execution of Drebin. If you want to do Drebin experiments manually, i.e. select what functionality you want to use, you should leave this parameter as empty.
 
     b. Functionalities:
