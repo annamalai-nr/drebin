@@ -1,3 +1,5 @@
+## **This repo contains a python implementation of Arp, Daniel, et al. "DREBIN: Effective and Explainable Detection of Android Malware in Your Pocket." NDSS. 2014.** ##
+
 ## **How do I get set up?** ##
 ***
 * Install Anaconda
@@ -14,13 +16,12 @@ Download from [http://continuum.io/downloads](http://continuum.io/downloads).
 
 ## **Who do I talk to?** ##
 ***
+* You may contact Arief Kresnadi Ignatius Kasim at arie0010@e.ntu.edu.sg or Loo Jia Yi at e140112@e.ntu.edu.sg
 * You may also contact Annamalai at ANNAMALA002@e.ntu.edu.sg
-  Arief Kresnadi Ignatius Kasim at arie0010@e.ntu.edu.sg
-  Loo Jia Yi at e140112@e.ntu.edu.sg
 
 ## **How do I use it?** ##
 ***
-1. Drebin
+1. Run "python Main.py"
 
     For Drebin, please make the repository folder as the current working directory. The arguments of Drebin are: 
 
