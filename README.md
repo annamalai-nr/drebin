@@ -1,52 +1,58 @@
-## **This repo contains a python implementation of Arp, Daniel, et al. "DREBIN: Effective and Explainable Detection of Android Malware in Your Pocket." NDSS. 2014.** ##
+What does this repository contain?
 
-## **How do I get set up?** ##
-***
-* Install Anaconda
+    This repo contains a python implementation of Arp, Daniel, et al. "DREBIN: Effective and Explainable Detection of Android Malware in Your Pocket." NDSS. 2014.
 
-    Anaconda is a completely free Python distribution (including for commercial use and redistribution). It includes over 195 of the most popular Python packages for science, math, engineering, data analysis.
-Download from [http://continuum.io/downloads](http://continuum.io/downloads).
+What package/platform dependencies do I need to have to run the code?
 
-* Download this repository
-* (Optional) Install Visual Studio 2015 with Python Tools
+    The code is developed and tested using python 2.7 on Ubuntu 16.04 PC.
+    The following packages need to be installed to run the code:
+    1. sklearn (==0.18.1)
+    2. pebble
+    3. glob
+    4. joblib (==0.11)
 
-    You may see there are solution files inside the repository. You may want to use Visual Studio 2015 to open it and do some modifications.
+How do I use it?
 
-* Done. Follow the **How do I use it?** section below to do your experiments.
+    Just clone the repo and follow the following instructions:
 
-## **Who do I talk to?** ##
-***
-* You may contact Arief Kresnadi Ignatius Kasim at arie0010@e.ntu.edu.sg or Loo Jia Yi at e140112@e.ntu.edu.sg
-* You may also contact Annamalai at ANNAMALA002@e.ntu.edu.sg
+    1. Move to the "src" folder.
 
-## **How do I use it?** ##
-***
-1. Run "python Main.py"
+    2. Run 'python Main.py --help' for the input arguments
+    Drebin can be run in 2 modes: (1) Random split classification, (2) Holdout classifiction. In random split mode, the apps in the given dataset are split into training and test sets and are used to train and evaluate the malware detection model, respectively. In the holdout classification mode, the apps for the training and test sets are separated from the start by default, or given by user.
 
-    For Drebin, please make the repository folder as the current working directory. The arguments of Drebin are: 
+    The default value of the arguments of Drebin are:
 
-    MalwareDirectory, GoodwareDirectory, TestMal, TestGood, NCpuCores, TestSize, Option**
+    --holdout      0 (split the dataset into training and test set and use the same for training and evaluating the model, respectively)
+		   1 (the dataset for training and test set are separated from the input)
+    --maldir       '../data/small_proto_apks/malware' (malware samples used to train the model)
+    --gooddir      '../data/small_proto_apks/goodware' (goodware samples used to train the model)
+    --testmaldir   '../data/apks/malware' (malware samples used to test the model. ONLY APPLICABLE IF --holdout IS NOT 0(must be an integer).)
+    --testgooddir  '../data/apks/goodware' (goodware samples used to test the model. ONLY APPLICABLE IF --holdout IS NOT 0(must be an integer).)
+    --testsize     0.3 (30% of the samples will be used for testing and the remaining 70% will be used to train the model. ONLY APPLICABLE IF --holdout IS 0.)
+    --ncpucores    maximum number of CPU cores to be used for multiprocessing (only during the feature extraction phase)
 
-    You have to specify at least **MalwareDirectory, GoodwareDirectory** before conducting any experiments.
+    3. Run 'python Main.py --holdout 0 --maldir <folder containing malware apks> --gooddir <folder containing goodware apks>' to build and test a Drebin malware detection model. By defatult, 70% and 30% of the samples will be used for training and testing the model, respectively.
 
-    a. Meaning of the parameters:
+    4. Run 'python Main.py --holdout 1 --maldir <folder containing training set malware apks> --gooddir <folder containing training set goodware apks> --testmaldir <folder containing test set malware apks> --testgooddir <folder containing test set goodware apks>'.
 
-    * MalwareDirectory: The location of the malware training set folder. It can be an absolute path of folder that contains all malware Apks or a folder that contains folders of malware Apks(used for malware family analysis and malware online analysis). More details will be shown in the functionality section.
-    * GoodwareDirectory: The location of the benign-ware training set folder. It is an absolute path of folder that contains all benign-ware Apks.
-    * TestMal: The location of the malware training set folder for holdout classification(this folder will be the holdout test set). It is an absolute path of folder that contains all malware Apks.
-    * TestGood: The location of the benign-ware training set folder for holdout classification(this folder will be the holdout test set). It is an absolute path of folder that contains all benign-ware Apks.
-    * NCpuCores : The number of processes that you want to parallelly run. It depends on how many cores your CPU have. E.g. If you have Intel 4 cores Core i7 CPU, then you’d better set this parameter to be 3. (One core for you to do some other tasks.)
-    * TestSize : The testing data set size for random classification after being split by train test split function
-    * Option: Set this parameter to do automatically execution of Drebin. If you want to do Drebin experiments manually, i.e. select what functionality you want to use, you should leave this parameter as empty.
+    Functionalities:
 
-    b. Functionalities:
+    User need to specify which mode* of classification to be done from --holdout option;
 
-    Once you run Drebin without setting the Option parameter, you shall see some prompts to let you input the Option. Each option corresponds to one functionality.
+    Random split classification:
 
-    1. Random split classification:
+    **--holdout 0(default)** allows you to do a random split classification for the given malware dataset and benign/goodware dataset.
+    The --maldir and --gooddir arguments should be the directories containing malware Apks and benign-ware Apks. The data files will be
+    generated automatically before the program does the random split classification.
 
-        **Option 1** allows you to do a random split classification for the given malware dataset and benign-ware dataset. The MalwareDirectory and GoodwareDirectory parameters should be the directories containing malware Apks and benign-ware Apks. The program will ask you to generate the missing data files for all Apks. (If you run the code for the first time, you need to generate the data files by input “Y”, otherwise you can input “N”.) After the data files are generated, the program will do the random split classification automatically.
+    Hold-out classification:
 
-    2. Hold-out classification:
+    **--holdout 1** allows you to specify the testing set. You can do a hold-out classification for the given training set and test set.
+    Beside settling the training set arguments as --holdout 0, You need to specify the testing set arguments in the command line i.e --testmaldir
+    and --testgooddir. The txt files will be generated automatically before the program does the hold-out classification.
 
-        **Option 2** allows you to specify the testing set. You can do a hold-out classification for the given trainning set and test set. Beside seting the trainning set arguments as Option 1, you need to specify the testing set parameters in the command line arguments, i.e. TestBad and TestGood. The program will ask you to generate the missing data files for all Apks. (If you run the code for the first time, you need to generate the data files by input “Y”, otherwise you can input “N”.) After the data files are generated, the program will do the hold-out classification automatically.
+Who do I talk to?
+
+    In case of issues/difficulties in running the code, please contact me at ANNAMALA002@e.ntu.edu.sg
+
+    You may also contact Arief Kresnadi Ignatius Kasim at arie0010@e.ntu.edu.sg or Loo Jia Yi at e140112@e.ntu.edu.sg

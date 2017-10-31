@@ -4,9 +4,15 @@ import scipy.sparse
 import numpy as np
 import CommonModules as CM
 from sklearn.feature_extraction.text import TfidfVectorizer as TF
-from sklearn import svm
+from sklearn.svm import LinearSVC
+from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
+import logging
+
+logging.basicConfig(level=logging.INFO)
+Logger = logging.getLogger('HoldoutClf.stdout')
+Logger.setLevel("INFO")
 
 
 def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, FeatureOption):
@@ -22,11 +28,12 @@ def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, Fe
     :param String FeatureOption: tfidf or binary, specify how to construct the feature vector
     '''
     # step 1: creating feature vector
+    Logger.debug("Loading Malware and Goodware Sample Data for training and testing")
     TrainMalSamples = CM.ListFiles(TrainMalSet, ".data")
     TrainGoodSamples = CM.ListFiles(TrainGoodSet, ".data")
     TestMalSamples = CM.ListFiles(TestMalSet, ".data")
     TestGoodSamples = CM.ListFiles(TestGoodSet, ".data")
-    print "Loaded Samples"
+    Logger.info("Loaded Samples")
 
     FeatureVectorizer = TF(input="filename", tokenizer=lambda x: x.split('\n'), token_pattern=None,
                            binary=FeatureOption)
@@ -38,26 +45,30 @@ def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, Fe
     Train_Good_labels = np.empty(len(TrainGoodSamples))
     Train_Good_labels.fill(-1)
     y_train = np.concatenate((Train_Mal_labels, Train_Good_labels), axis=0)
-    print "Training Label array - generated"
+    Logger.info("Training Label array - generated")
 
     # label testing sets malware as 1 and goodware as -1
     Test_Mal_labels = np.ones(len(TestMalSamples))
     Test_Good_labels = np.empty(len(TestGoodSamples))
     Test_Good_labels.fill(-1)
     y_test = np.concatenate((Test_Mal_labels, Test_Good_labels), axis=0)
-    print "Testing Label array - generated"
+    Logger.info("Testing Label array - generated")
 
     # step 2: train the model
+    Logger.info("Perform Classification with SVM Model")
+    Parameters= {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 
-    LinearSVM = svm.LinearSVC()
     T0 = time.time()
-    LinearSVM.fit(x_train, y_train)
-    TrainingTime = round(time.time() - T0,2)
-    print "The training time for classification is %s sec." % (TrainingTime)
+    Clf = GridSearchCV(LinearSVC(), Parameters, cv= 5, scoring= 'f1', n_jobs=-1 )
+    SVMModels= Clf.fit(x_train, y_train)
+    Logger.info("Processing time to train and find best model with GridSearchCV is %s sec." %(round(time.time() -T0, 2)))
+    BestModel= SVMModels.best_estimator_
+    Logger.info("Best Model Selected : {}".format(BestModel))
+    print "The training time for random split classification is %s sec." % (round(time.time() - T0,2))
     # print "CV done - model selected"
 
     # step 4: Evaluate the best model on test set
-    y_pred = LinearSVM.predict(x_test)
+    y_pred = SVMModels.predict(x_test)
     TestingTime = round(time.time() - TrainingTime - T0,2)
     Accuracy = accuracy_score(y_test, y_pred)  # Return (x1 == x2) element-wise.
     print "Test Set Accuracy = ", Accuracy

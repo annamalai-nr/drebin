@@ -1,15 +1,18 @@
 import numpy as np
-import scipy.sparse
 import time
 from sklearn.cross_validation import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer as TF
-from sklearn import svm
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import LinearSVC
 from sklearn import metrics
 from sklearn.metrics import accuracy_score
-
+import logging
 import random
-
 import CommonModules as CM
+
+logging.basicConfig(level=logging.INFO)
+Logger = logging.getLogger('RandomClf.stdout')
+Logger.setLevel("INFO")
 
 
 def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption):
@@ -25,10 +28,10 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption)
     :rtype String Report: result report
     '''
     # step 1: creating feature vector
-
+    Logger.debug("Loading Malware and Goodware Sample Data")
     AllMalSamples = CM.ListFiles(MalwareCorpus, ".data")
     AllGoodSamples = CM.ListFiles(GoodwareCorpus, ".data")
-    print "Loaded samples"
+    Logger.info("Loaded samples")
 
     FeatureVectorizer = TF(input='filename', tokenizer=lambda x: x.split('\n'), token_pattern=None,
                            binary=FeatureOption)
@@ -39,26 +42,32 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption)
     Good_labels = np.empty(len(AllGoodSamples))
     Good_labels.fill(-1)
     y = np.concatenate((Mal_labels, Good_labels), axis=0)
-    print "Label array - generated"
+    Logger.info("Label array - generated")
 
 
     # step 2: split all samples to training set and test set
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TestSize,
                                                  random_state=random.randint(0, 100))
-    print "train-test split done"
+    Logger.debug("Test set split = %s", TestSize)
+    Logger.info("train-test split done")
 
     # step 3: train the model
+    Logger.info("Perform Classification with SVM Model")
+    Parameters= {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 
-    LinearSVM = svm.LinearSVC()
     T0 = time.time()
-    LinearSVM.fit(x_train, y_train)
+    Clf = GridSearchCV(LinearSVC(), Parameters, cv= 5, scoring= 'f1', n_jobs=-1 )
+    SVMModels= Clf.fit(x_train, y_train)
+    Logger.info("Processing time to train and find best model with GridSearchCV is %s sec." %(round(time.time() -T0, 2)))
+    BestModel= SVMModels.best_estimator_
+    Logger.info("Best Model Selected : {}".format(BestModel))
     print "The training time for random split classification is %s sec." % (round(time.time() - T0,2))
     # print "CV done - model selected"
 
     # step 4: Evaluate the best model on test set
     T0 = time.time()
-    y_pred = LinearSVM.predict(x_test)
+    y_pred = SVMModels.predict(x_test)
     print "The testing time for random split classification is %s sec." % (round(time.time() - T0,2))
     Accuracy = accuracy_score(y_test, y_pred)
     print "Test Set Accuracy = {}".format(Accuracy)
