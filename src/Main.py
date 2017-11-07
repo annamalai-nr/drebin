@@ -16,6 +16,7 @@ def main(Args, FeatureOption):
     MalDir= Args.maldir
     GoodDir= Args.gooddir
     NCpuCores= Args.ncpucores
+    Model= Args.model
 
     if Args.holdout == 0:
         #Perform Random Classification
@@ -23,14 +24,14 @@ def main(Args, FeatureOption):
         Logger.debug("MalDir: {}, GoodDir: {}, NCpuCores: {}, TestSize: {}, FeatureOption: {}"
                      .format(MalDir, GoodDir, NCpuCores, TestSize, FeatureOption))
         GetApkData(NCpuCores, MalDir, GoodDir)
-        RandomClassification(MalDir, GoodDir, TestSize, FeatureOption)
+        RandomClassification(MalDir, GoodDir, TestSize, FeatureOption, Model)
     else:
         TestMalDir= Args.testmaldir
         TestGoodDir= Args.testgooddir
         Logger.debug("MalDir: {}, GoodDir: {}, TestMalDir: {}, TestGoodDir: {} NCpuCores: {}, FeatureOption: {}"
                      .format(MalDir, GoodDir, TestMalDir, TestGoodDir, NCpuCores,  FeatureOption))
         GetApkData(NCpuCores, MalDir, GoodDir, TestMalDir, TestGoodDir)
-        HoldoutClassification(MalDir, GoodDir, TestMalDir, TestGoodDir, FeatureOption)
+        HoldoutClassification(MalDir, GoodDir, TestMalDir, TestGoodDir, FeatureOption, Model)
 
 def ParseArgs():
     Args =  argparse.ArgumentParser(description="Classification of Android Applications")
@@ -48,6 +49,8 @@ def ParseArgs():
                       help= "Number of CPUs that will be used for processing")
     Args.add_argument("--testsize", type= float, default= 0.3,
                       help= "Size of the test set when split by Scikit Learn's Train Test Split module")
+    Args.add_argument("--model",
+                      help= "Absolute path to the saved model file(.pkl extension)")
 
     return Args.parse_args()
 
