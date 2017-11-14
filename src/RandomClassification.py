@@ -10,7 +10,9 @@ import logging
 import random
 import CommonModules as CM
 from joblib import dump, load
-
+from pprint import pprint
+import json
+import os
 
 logging.basicConfig(level=logging.INFO)
 Logger = logging.getLogger('RandomClf.stdout')
@@ -33,6 +35,7 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
     Logger.debug("Loading Malware and Goodware Sample Data")
     AllMalSamples = CM.ListFiles(MalwareCorpus, ".data")
     AllGoodSamples = CM.ListFiles(GoodwareCorpus, ".data")
+    AllSampleNames = AllMalSamples + AllGoodSamples
     Logger.info("Loaded samples")
 
     FeatureVectorizer = TF(input='filename', tokenizer=lambda x: x.split('\n'), token_pattern=None,
@@ -48,9 +51,12 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
 
 
     # step 2: split all samples to training set and test set
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TestSize,
-                                                 random_state=random.randint(0, 100))
+    x_train_samplenames, x_test_samplenames, y_train, y_test = train_test_split(AllSampleNames, y, test_size=TestSize,
+                                                     random_state=random.randint(0, 100))
+    #x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=TestSize,
+    #                                             random_state=random.randint(0, 100))
+    x_train = FeatureVectorizer.fit_transform(x_train_samplenames)
+    x_test = FeatureVectorizer.transform(x_test_samplenames)
     Logger.debug("Test set split = %s", TestSize)
     Logger.info("train-test split done")
 
@@ -87,5 +93,33 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
                                                                                            labels=[1, -1],
                                                                                            target_names=['Malware',
                                                                                                          'Goodware'])
+    # pointwise multiplication between weight and feature vect
+    NumTopFeats = 10
+    w = BestModel.coef_
+    w = w[0].tolist()
+    v = x_test.toarray()
+    vocab = FeatureVectorizer.get_feature_names()
+    explanations = {os.path.basename(s):{} for s in x_test_samplenames}
+    for i in range(v.shape[0]):
+        wx = v[i, :] * w
+        wv_vocab = zip(wx, vocab)
+        if y_pred[i] == 1:
+            wv_vocab.sort(reverse=True)
+            #print "pred: {}, org: {}".format(y_pred[i],y_test[i])
+            #pprint(wv_vocab[:10])
+            explanations[os.path.basename(x_test_samplenames[i])]['top_features'] = wv_vocab[:NumTopFeats]
+            #raw_input()
+        elif y_pred[i] == -1:
+            wv_vocab.sort()
+            #print "pred: {}, org: {}".format(y_pred[i],y_test[i])
+            #pprint(wv_vocab[-10:])
+            explanations[os.path.basename(x_test_samplenames[i])]['top_features'] = wv_vocab[-NumTopFeats:]
+            #raw_input()
+        explanations[os.path.basename(x_test_samplenames[i])]['original_label'] = y_test[i]
+        explanations[os.path.basename(x_test_samplenames[i])]['predicted_label'] = y_pred[i]
+   
+    with open('explanations.json','w') as FH:
+        json.dump(explanations,FH,indent=4)
+
     # return TestLabels, PredictedLabels
     return Report
