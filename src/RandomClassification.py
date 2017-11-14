@@ -94,7 +94,7 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
                                                                                            target_names=['Malware',
                                                                                                          'Goodware'])
     # pointwise multiplication between weight and feature vect
-    NumTopFeats = 10
+    NumTopFeats = 30
     w = BestModel.coef_
     w = w[0].tolist()
     v = x_test.toarray()
