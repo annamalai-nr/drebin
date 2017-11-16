@@ -10,16 +10,15 @@ import logging
 import random
 import CommonModules as CM
 from joblib import dump, load
-from pprint import pprint
-import json
-import os
+#from pprint import pprint
+import json, os
 
 logging.basicConfig(level=logging.INFO)
 Logger = logging.getLogger('RandomClf.stdout')
 Logger.setLevel("INFO")
 
 
-def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption, Model):
+def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption, Model, NumTopFeats):
     '''
     Train a classifier for classifying malwares and goodwares using Support Vector Machine technique.
     Compute the prediction accuracy and f1 score of the classifier.
@@ -64,8 +63,8 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
     Logger.info("Perform Classification with SVM Model")
     Parameters= {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 
+    T0 = time.time() 
     if not Model:
-        T0 = time.time()
         Clf = GridSearchCV(LinearSVC(), Parameters, cv= 5, scoring= 'f1', n_jobs=-1 )
         SVMModels= Clf.fit(x_train, y_train)
         Logger.info("Processing time to train and find best model with GridSearchCV is %s sec." %(round(time.time() -T0, 2)))
@@ -77,7 +76,7 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
         dump(Clf, filename + ".pkl")
     else:
         SVMModels = load(Model)
-        # print "CV done - model selected"
+        BestModel= SVMModels.best_estimator
 
     # step 4: Evaluate the best model on test set
     T0 = time.time()
@@ -94,7 +93,6 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
                                                                                            target_names=['Malware',
                                                                                                          'Goodware'])
     # pointwise multiplication between weight and feature vect
-    NumTopFeats = 30
     w = BestModel.coef_
     w = w[0].tolist()
     v = x_test.toarray()
@@ -108,17 +106,15 @@ def RandomClassification(MalwareCorpus, GoodwareCorpus, TestSize, FeatureOption,
             #print "pred: {}, org: {}".format(y_pred[i],y_test[i])
             #pprint(wv_vocab[:10])
             explanations[os.path.basename(x_test_samplenames[i])]['top_features'] = wv_vocab[:NumTopFeats]
-            #raw_input()
         elif y_pred[i] == -1:
             wv_vocab.sort()
             #print "pred: {}, org: {}".format(y_pred[i],y_test[i])
             #pprint(wv_vocab[-10:])
             explanations[os.path.basename(x_test_samplenames[i])]['top_features'] = wv_vocab[-NumTopFeats:]
-            #raw_input()
         explanations[os.path.basename(x_test_samplenames[i])]['original_label'] = y_test[i]
         explanations[os.path.basename(x_test_samplenames[i])]['predicted_label'] = y_pred[i]
    
-    with open('explanations.json','w') as FH:
+    with open('explanations_RC.json','w') as FH:
         json.dump(explanations,FH,indent=4)
 
     # return TestLabels, PredictedLabels
