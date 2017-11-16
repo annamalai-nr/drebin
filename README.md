@@ -22,14 +22,16 @@ How do I use it?
 
     The default value of the arguments of Drebin are:
 
-    --holdout      0 (split the dataset into training and test set and use the same for training and evaluating the model, respectively)
-		   1 (the dataset for training and test set are separated from the input)
-    --maldir       '../data/small_proto_apks/malware' (malware samples used to train the model)
-    --gooddir      '../data/small_proto_apks/goodware' (goodware samples used to train the model)
-    --testmaldir   '../data/apks/malware' (malware samples used to test the model. ONLY APPLICABLE IF --holdout IS NOT 0(must be an integer).)
-    --testgooddir  '../data/apks/goodware' (goodware samples used to test the model. ONLY APPLICABLE IF --holdout IS NOT 0(must be an integer).)
-    --testsize     0.3 (30% of the samples will be used for testing and the remaining 70% will be used to train the model. ONLY APPLICABLE IF --holdout IS 0.)
-    --ncpucores    maximum number of CPU cores to be used for multiprocessing (only during the feature extraction phase)
+    --holdout       0 (split the dataset into training and test set and use the same for training and evaluating the model,respectively)
+		    1 (the dataset for training and test set are separated from the input)
+    --maldir        '../data/small_proto_apks/malware' (malware samples used to train the model)
+    --gooddir       '../data/small_proto_apks/goodware' (goodware samples used to train the model)
+    --testmaldir    '../data/apks/malware' (malware samples used to test the model. ONLY APPLICABLE IF --holdout IS NOT 0(must be an integer).)
+    --testgooddir   '../data/apks/goodware' (goodware samples used to test the model. ONLY APPLICABLE IF --holdout IS NOT 0(must be an integer).)
+    --testsize      0.3 (30% of the samples will be used for testing and the remaining 70% will be used to train the model. ONLY APPLICABLE IF --holdout IS 0.)
+    --ncpucores     maximum number of CPU cores to be used for multiprocessing (only during the feature extraction phase)
+    --model         classifier model will be trained and saved as a .pk1 file(name of file is specified by the user)
+    --numfeatforexp 30(number of top features to be shown for each test sample)
 
     3. Run 'python Main.py --holdout 0 --maldir <folder containing malware apks> --gooddir <folder containing goodware apks>' to build and test a Drebin malware detection model. By defatult, 70% and 30% of the samples will be used for training and testing the model, respectively.
 
