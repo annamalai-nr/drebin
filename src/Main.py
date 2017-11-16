@@ -17,21 +17,22 @@ def main(Args, FeatureOption):
     GoodDir= Args.gooddir
     NCpuCores= Args.ncpucores
     Model= Args.model
+    NumFeatForExp = Args.numfeatforexp
 
     if Args.holdout == 0:
         #Perform Random Classification
         TestSize= Args.testsize
-        Logger.debug("MalDir: {}, GoodDir: {}, NCpuCores: {}, TestSize: {}, FeatureOption: {}"
-                     .format(MalDir, GoodDir, NCpuCores, TestSize, FeatureOption))
+        Logger.debug("MalDir: {}, GoodDir: {}, NCpuCores: {}, TestSize: {}, FeatureOption: {}, NumFeatForExp: {}"
+                     .format(MalDir, GoodDir, NCpuCores, TestSize, FeatureOption, NumFeatForExp))
         GetApkData(NCpuCores, MalDir, GoodDir)
-        RandomClassification(MalDir, GoodDir, TestSize, FeatureOption, Model)
+        RandomClassification(MalDir, GoodDir, TestSize, FeatureOption, Model, NumFeatForExp)
     else:
         TestMalDir= Args.testmaldir
         TestGoodDir= Args.testgooddir
-        Logger.debug("MalDir: {}, GoodDir: {}, TestMalDir: {}, TestGoodDir: {} NCpuCores: {}, FeatureOption: {}"
-                     .format(MalDir, GoodDir, TestMalDir, TestGoodDir, NCpuCores,  FeatureOption))
+        Logger.debug("MalDir: {}, GoodDir: {}, TestMalDir: {}, TestGoodDir: {} NCpuCores: {}, FeatureOption: {}, NumFeatForExp: {}"
+                     .format(MalDir, GoodDir, TestMalDir, TestGoodDir, NCpuCores,  FeatureOption, NumFeatForExp))
         GetApkData(NCpuCores, MalDir, GoodDir, TestMalDir, TestGoodDir)
-        HoldoutClassification(MalDir, GoodDir, TestMalDir, TestGoodDir, FeatureOption, Model)
+        HoldoutClassification(MalDir, GoodDir, TestMalDir, TestGoodDir, FeatureOption, Model, NumFeatForExp)
 
 def ParseArgs():
     Args =  argparse.ArgumentParser(description="Classification of Android Applications")
@@ -51,7 +52,8 @@ def ParseArgs():
                       help= "Size of the test set when split by Scikit Learn's Train Test Split module")
     Args.add_argument("--model",
                       help= "Absolute path to the saved model file(.pkl extension)")
-
+    Args.add_argument("--numfeatforexp", type= int, default = 30,
+                      help= "Number of top features to show for each test sample")
     return Args.parse_args()
 
 if __name__ == "__main__":
