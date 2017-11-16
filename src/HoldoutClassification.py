@@ -10,13 +10,15 @@ from sklearn import metrics
 from sklearn.metrics import accuracy_score
 import logging
 from joblib import dump, load
+import json, os
+#from pprint import pprint
 
 logging.basicConfig(level=logging.INFO)
 Logger = logging.getLogger('HoldoutClf.stdout')
 Logger.setLevel("INFO")
 
 
-def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, FeatureOption, Model):
+def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, FeatureOption, Model, NumTopFeats):
     '''
     Train a classifier for classifying malwares and goodwares using Support Vector Machine technique.
     Compute the prediction accuracy and f1 score of the classifier.
@@ -34,6 +36,7 @@ def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, Fe
     TrainGoodSamples = CM.ListFiles(TrainGoodSet, ".data")
     TestMalSamples = CM.ListFiles(TestMalSet, ".data")
     TestGoodSamples = CM.ListFiles(TestGoodSet, ".data")
+    AllTestSamples = TestMalSamples + TestGoodSamples
     Logger.info("Loaded Samples")
 
     FeatureVectorizer = TF(input="filename", tokenizer=lambda x: x.split('\n'), token_pattern=None,
@@ -59,21 +62,22 @@ def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, Fe
     Logger.info("Perform Classification with SVM Model")
     Parameters= {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 
+    T0 = time.time()
     if not Model:
-        T0 = time.time()
         Clf = GridSearchCV(LinearSVC(), Parameters, cv= 5, scoring= 'f1', n_jobs=-1 )
         SVMModels= Clf.fit(x_train, y_train)
         Logger.info("Processing time to train and find best model with GridSearchCV is %s sec." %(round(time.time() -T0, 2)))
         BestModel= SVMModels.best_estimator_
         Logger.info("Best Model Selected : {}".format(BestModel))
-        print "The training time for random split classification is %s sec." % (round(time.time() - T0,2))
+        TrainingTime = round(time.time() - T0,2)
+        print "The training time for random split classification is %s sec." % (TrainingTime)
         print "Enter a filename to save the model:"
         filename = raw_input()
         dump(Clf, filename+".pkl")
     else:
         SVMModels= load(Model)
-
-        # print "CV done - model selected"
+        BestModels= SVMModels.best_estimator_
+        TrainingTime = 0
 
     # step 4: Evaluate the best model on test set
     y_pred = SVMModels.predict(x_test)
@@ -88,4 +92,29 @@ def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, Fe
                                                                                            labels=[1, -1],
                                                                                            target_names=['Malware',
                                                                                                          'Goodware'])
+    # pointwise multiplication between weight and feature vect
+    w = BestModel.coef_
+    w = w[0].tolist()
+    v = x_test.toarray()
+    vocab = FeatureVectorizer.get_feature_names()
+    explanations = {os.path.basename(s):{} for s in AllTestSamples}
+    for i in range(v.shape[0]):
+        wx = v[i, :] * w
+        wv_vocab = zip(wx, vocab)
+        if y_pred[i] == 1:
+            wv_vocab.sort(reverse=True)
+           # print "pred: {}, org: {}".format(y_pred[i],y_test[i])
+           # pprint(wv_vocab[:10])
+            explanations[os.path.basename(AllTestSamples[i])]['top_features'] = wv_vocab[:NumTopFeats]
+        elif y_pred[i] == -1:
+            wv_vocab.sort()
+           # print "pred: {}, org: {}".format(y_pred[i],y_test[i])
+           # pprint(wv_vocab[-10:])
+            explanations[os.path.basename(AllTestSamples[i])]['top_features'] = wv_vocab[-NumTopFeats:]
+        explanations[os.path.basename(AllTestSamples[i])]['original_label'] = y_test[i]
+        explanations[os.path.basename(AllTestSamples[i])]['predicted_label'] = y_pred[i]
+
+    with open('explanations_HC.json','w') as FH:
+        json.dump(explanations,FH,indent=4)
+
     return y_train, y_test, y_pred, TrainingTime, TestingTime
