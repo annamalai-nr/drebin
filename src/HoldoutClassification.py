@@ -76,7 +76,7 @@ def HoldoutClassification(TrainMalSet, TrainGoodSet, TestMalSet, TestGoodSet, Fe
         dump(Clf, filename+".pkl")
     else:
         SVMModels= load(Model)
-        BestModels= SVMModels.best_estimator_
+        BestModel= SVMModels.best_estimator_
         TrainingTime = 0
 
     # step 4: Evaluate the best model on test set
