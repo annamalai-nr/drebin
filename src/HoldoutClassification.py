@@ -1,7 +1,6 @@
 import numpy as np
 import time
 import scipy.sparse
-import numpy as np
 import CommonModules as CM
 from sklearn.feature_extraction.text import TfidfVectorizer as TF
 from sklearn.svm import LinearSVC
